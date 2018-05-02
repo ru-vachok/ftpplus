@@ -1,0 +1,63 @@
+//noinspection GroovyAssignabilityCheck
+group 'ru.vachok.ftpplus'
+//noinspection GroovyAssignabilityCheck
+version '0.0.1'
+
+
+buildscript {
+    ext {
+        mysql_version = '5.1.46'
+    }
+}
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ["src/main/java", "src/main/resources"]
+            includes = ["**/*.fxml", "**/*.css", "**/*.pem","**/*.pub", "**/*.properties", "**/*.png","**/*.html","**/*.sql", "**/*.exe"]
+        }
+    }
+    test{
+        resources{
+            srcDirs = ["src/test/java", "src/test/resources"]
+            includes = ["**/*.fxml", "**/*.css", "**/*.pem","**/*.pub", "**/*.utty.exe", "**/*.properties", "**/*.png"]
+        }
+    }
+}
+
+mainClassName = group + '.StartMe'
+
+sourceCompatibility = 1.10
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+//    // https://mvnrepository.com/artifact/com.google.guava/guava
+    compile group: 'com.google.guava', name: 'guava', version: '24.1-jre'
+    // https://mvnrepository.com/artifact/junit/junit
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.46'
+    // https://mvnrepository.com/artifact/commons-io/commons-io
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    // https://mvnrepository.com/artifact/org.jetbrains/annotations
+    compile group: 'org.jetbrains', name: 'annotations', version: '16.0.1'
+}
+jar {
+    baseName = project.name
+    version = project.version
+    manifest {
+        attributes(
+                'Main-Class': mainClassName,
+                'JavaFX-Version': 10,
+                'Class-Path': configurations.runtime.collect() { 'mylib/' + it.name }.join('')
+        )
+    }
+    from configurations.compile.collect() { it.isDirectory() ? it : zipTree(it) }
+}
