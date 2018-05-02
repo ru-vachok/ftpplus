@@ -4,6 +4,8 @@ package ru.vachok.ftpplus;
 
 import com.google.common.base.MoreObjects;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 /**
@@ -27,6 +29,16 @@ public enum Const {
      */
     private static final int TIMEOUT_5 = 5000;
     /**
+     Запуск в потоках
+     */
+    public static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
+    /**
+     Сумма на старте
+     {@link ru.vachok.ftpplus.feat.RateOfInterestConsole}
+     */
+    public static final float SUMMA_START = 119061.9f;
+
+    /**
      @return <code>.toString</code>
      */
     @Override
@@ -36,6 +48,7 @@ public enum Const {
                 .add("OK", OK)
                 .add("TIMEOUT_5", TIMEOUT_5)
                 .add("IN_PROGRESS", IN_PROGRESS)
+                .add("EXECUTOR_SERVICE", EXECUTOR_SERVICE)
                 .toString();
     }
 }
