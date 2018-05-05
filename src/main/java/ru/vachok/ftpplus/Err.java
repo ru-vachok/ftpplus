@@ -2,9 +2,8 @@ package ru.vachok.ftpplus;
 
 
 
+import javafx.scene.control.Dialog;
 import ru.vachok.ftpplus.factor.MessageForUser;
-
-import java.time.LocalDateTime;
 
 /**
  Класс будет давать объект <b>сообщение.</b>
@@ -21,7 +20,9 @@ public class Err implements MessageForUser {
      */
     @Override
     public void errorMs(String message) {
-        System.err.println("message = " + message + LocalDateTime.now());
+        Dialog dialog = new Dialog();
+        dialog.setContentText(message);
+        dialog.showAndWait();
     }
     /**
      OK

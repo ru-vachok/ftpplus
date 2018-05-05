@@ -36,7 +36,6 @@ public enum Const {
      Сумма на старте
      {@link ru.vachok.ftpplus.feat.RateOfInterestConsole}
      */
-    public static final float SUMMA_START = 119061.9f;
 
     /**
      @return <code>.toString</code>

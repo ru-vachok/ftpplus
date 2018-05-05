@@ -7,3 +7,7 @@ build/
 gradlew
 gradlew.bat
 src/test/
+/sb.html
+/RateOfInterestConsole.log
+RateOfInterestConsole.log
+src/main/resources/
