@@ -1,0 +1,13 @@
+.gradle/
+.idea/
+build/
+gradle/
+gradlew
+gradlew.bat
+ru.vachok.parsing.iml
+ru.vachok.parsing.ipr
+ru.vachok.parsing.iws
+ru.vachok.parsing_main.iml
+ru.vachok.parsing_test.iml
+lib/
+src/test/
