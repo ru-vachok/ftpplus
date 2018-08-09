@@ -11,3 +11,8 @@ ru.vachok.parsing_main.iml
 ru.vachok.parsing_test.iml
 lib/
 src/test/
+mypref.pref
+mypref-node.pref
+mypref-subtree.pref
+InitProperties.properties
+cb.html
