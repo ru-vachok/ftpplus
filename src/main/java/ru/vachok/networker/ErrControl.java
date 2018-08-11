@@ -22,7 +22,7 @@ public class ErrControl implements ErrorController {
    public String errHandle(HttpServletRequest httpServletRequest) {
       Integer statCode = ( Integer ) httpServletRequest.getAttribute("javax.servlet.error.status_code");
       Exception exception = ( Exception ) httpServletRequest.getAttribute("javax.servlet.error.exception");
-      return String.format("<html><body><h2>ОШИБКА</h2><div>Status code: <b>%s</b></div>"
+       return String.format("<html><body><h2>ОШИБКА, нех здесь ловить...</h2><div>Status code: <b>%s</b></div>"
                   + "<div>Exception Message: <b>%s</b></div><body></html>",
             statCode, exception==null? "N/A": exception.getMessage());
    }
