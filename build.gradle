@@ -17,14 +17,16 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
 group = 'ru.vachok.networker'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2-SNAPSHOT'
 sourceCompatibility = 10
 
 repositories {
 	mavenCentral()
+
 }
 
 dependencies {
+	compile fileTree ('lib\\')
 	compile('org.springframework.boot:spring-boot-starter-mustache')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	// https://mvnrepository.com/artifact/org.springframework/spring-jdbc
