@@ -1,4 +1,4 @@
-package ru.vachok.networker;
+package ru.vachok.networker.pasclass;
 
 
 
@@ -7,6 +7,8 @@ import ru.vachok.messenger.MessageToUser;
 
 
 /**
+ * The type Person.
+ *
  * @since 11.08.2018 (21:14)
  */
 public class Person {
@@ -23,32 +25,60 @@ public class Person {
     private String lastName;
 
 
+    /**
+     * Instantiates a new Person.
+     */
     public Person() {
-
     }
 
 
+    /**
+     * Instantiates a new Person.
+     *
+     * @param firstName the first name
+     * @param lastName  the last name
+     */
     public Person( String firstName , String lastName ) {
         this.firstName = firstName;
         this.lastName = lastName;
     }
 
 
+    /**
+     * Gets first name.
+     *
+     * @return the first name
+     */
     public String getFirstName() {
         return firstName;
     }
 
 
+    /**
+     * Sets first name.
+     *
+     * @param firstName the first name
+     */
     public void setFirstName( String firstName ) {
         this.firstName = firstName;
     }
 
 
+    /**
+     * Gets last name.
+     *
+     * @return the last name
+     */
     public String getLastName() {
         return lastName;
     }
 
 
+    /**
+     * Sets last name.
+     *
+     * @param lastName the last name
+     */
     public void setLastName( String lastName ) {
         this.lastName = lastName;
     }

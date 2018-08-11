@@ -1,4 +1,4 @@
-package ru.vachok.networker;
+package ru.vachok.networker.workers;
 
 
 
@@ -13,6 +13,8 @@ import java.util.function.BiConsumer;
 
 
 /**
+ * The type Saver by older.
+ *
  * @since 11.08.2018 (18:20)
  */
 public class SaverByOlder implements Runnable {
@@ -28,6 +30,11 @@ public class SaverByOlder implements Runnable {
     private Map<String, String> showMe;
 
 
+    /**
+     * Instantiates a new Saver by older.
+     *
+     * @param showMe the show me
+     */
     public SaverByOlder( Map<String, String> showMe ) {
         this.showMe = showMe;
     }

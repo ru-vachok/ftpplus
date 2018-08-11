@@ -59,3 +59,8 @@ gradlew.bat
 /modules/money/regpass
 /modules/money/url.test.html
 /props/
+4.tmp
+modules/money/out/
+modules/money/src/main/
+show.me
+startmetest.log

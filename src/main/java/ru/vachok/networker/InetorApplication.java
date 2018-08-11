@@ -5,10 +5,18 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
+/**
+ * The type Inetor application.
+ */
 @SpringBootApplication
 public class InetorApplication {
 
-   public static void main(String[] args) {
-      SpringApplication.run(InetorApplication.class, args);
-   }
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
+    public static void main( String[] args ) {
+        SpringApplication.run(InetorApplication.class, args);
+    }
 }

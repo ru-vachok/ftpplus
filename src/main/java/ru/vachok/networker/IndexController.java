@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ru.vachok.messenger.MessageCons;
 import ru.vachok.messenger.MessageToUser;
+import ru.vachok.networker.pasclass.Person;
+import ru.vachok.networker.pasclass.PersonForm;
+import ru.vachok.networker.pasclass.Repo;
+import ru.vachok.networker.pasclass.Visitor;
+import ru.vachok.networker.workers.SaverByOlder;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -27,6 +32,9 @@ import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 
+/**
+ * The type Index controller.
+ */
 @Controller
 public class IndexController {
 
@@ -47,6 +55,16 @@ public class IndexController {
     private String errMessage;
 
 
+    /**
+     * Map to show map.
+     *
+     * @param httpServletRequest  the http servlet request
+     * @param httpServletResponse the http servlet response
+     * @return the map
+     *
+     * @throws IOException      the io exception
+     * @throws ServletException the servlet exception
+     */
     @RequestMapping("/docs")
     @ResponseBody
     public Map<String, String> mapToShow( HttpServletRequest httpServletRequest , HttpServletResponse httpServletResponse ) throws IOException, ServletException {
@@ -55,29 +73,40 @@ public class IndexController {
         SHOW_ME.put("addr" , httpServletRequest.getRemoteAddr());
         SHOW_ME.put("host" , httpServletRequest.getRequestURL().toString());
         SHOW_ME.forEach(( x , y ) -> messageToUser.info(this.getClass().getSimpleName() , x , y));
-        new CookBo().genCook().addCookie(httpServletResponse , httpServletRequest.getQueryString());
         Stream<String> stringStream = addrInLocale(httpServletRequest , httpServletResponse);
         stringStream.forEach(x -> SHOW_ME.put("addrInLocale" , x));
         SHOW_ME.put("status" , httpServletResponse.getStatus() + " " + httpServletResponse.getBufferSize() + " buff");
         String s = httpServletRequest.getQueryString();
         if (s != null) {
             SHOW_ME.put(this.toString() , s);
-            if (s.contains("chess"))
-                httpServletResponse.sendRedirect("https" + "://vachok" + ".testquality" + ".com/project/3260/plan/6672/test/86686");
+            if (s.contains("chess")) httpServletResponse.sendRedirect("https" + "://vachok" + ".testquality" + ".com/project/3260/plan/6672/test/86686");
             executorService.execute(r);
             System.exit(0);
         }
         executorService.execute(r);
+        Repo.getI(httpServletRequest.getSession().getCreationTime() , httpServletRequest.getRemoteAddr());
         return SHOW_ME;
     }
 
 
+    /**
+     * Addr in locale stream.
+     *
+     * @param httpServletRequest  the http servlet request
+     * @param httpServletResponse the http servlet response
+     * @return the stream
+     *
+     * @throws IOException the io exception
+     */
     @RequestMapping("/vir")
     @ResponseBody
     public Stream<String> addrInLocale( HttpServletRequest httpServletRequest , HttpServletResponse httpServletResponse ) throws IOException {
         String re = "redirect:https://vachok.testquality.com/project/3260/plan/6672/test/86686\n" + Arrays.toString(new UnknownError().getStackTrace()).replaceAll(", " , "\n\n");
         ServletInputStream in = httpServletRequest.getInputStream();
-        byte[] bs = in.readAllBytes();
+        byte[] bs = new byte[0];
+        while (in.isReady()) {
+            in.read(bs);
+        }
         messageToUser.info("HTTP Servlets Controller" , httpServletRequest.getServletPath() + re , "1 КБ resp: " + new String(bs , "UTF-8"));
         File[] files = new File("g:\\myEX\\").listFiles();
         int length = files.length;
@@ -93,6 +122,12 @@ public class IndexController {
     }
 
 
+    /**
+     * Exit app.
+     *
+     * @param httpServletRequest the http servlet request
+     * @throws IOException the io exception
+     */
     @RequestMapping("/stop")
     public void exitApp( HttpServletRequest httpServletRequest ) throws IOException {
         String s = httpServletRequest.getRequestURL().toString();
@@ -100,13 +135,31 @@ public class IndexController {
         Runtime.getRuntime().exec("shutdown /p /f");
     }
 
+
+    /**
+     * Index string.
+     *
+     * @param model   the model
+     * @param request the request
+     * @return the string
+     */
     @RequestMapping(value = {"/" , "/index"}, method = RequestMethod.GET)
-    public String index( Model model ) {
+    public String index( Model model , HttpServletRequest request ) {
+        long time = request.getSession().getCreationTime();
+        String remoteAddr = request.getRemoteAddr();
+        new Visitor(time , remoteAddr);
+        System.out.println(new Date(time) + " was - " + remoteAddr);
         model.addAttribute("message" , message);
         return "index";
     }
 
 
+    /**
+     * Person list string.
+     *
+     * @param model the model
+     * @return the string
+     */
     @RequestMapping(value = {"/personList"}, method = RequestMethod.GET)
     public String personList( Model model ) {
         model.addAttribute("personList" , persons);
@@ -114,6 +167,12 @@ public class IndexController {
     }
 
 
+    /**
+     * Show add person page string.
+     *
+     * @param model the model
+     * @return the string
+     */
     @RequestMapping(value = {"/addPerson"}, method = RequestMethod.GET)
     public String showAddPersonPage( Model model ) {
 
@@ -124,6 +183,13 @@ public class IndexController {
     }
 
 
+    /**
+     * Save person string.
+     *
+     * @param model      the model
+     * @param personForm the person form
+     * @return the string
+     */
     @RequestMapping(value = {"/addPerson"}, method = RequestMethod.POST)
     public String savePerson( Model model , @ModelAttribute("personForm") PersonForm personForm ) {
         String firstName = personForm.getFirstName();
