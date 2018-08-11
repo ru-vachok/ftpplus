@@ -2,11 +2,13 @@ package ru.vachok.networker;
 
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 import ru.vachok.messenger.MessageCons;
 import ru.vachok.messenger.MessageToUser;
 
@@ -29,7 +31,20 @@ import java.util.stream.Stream;
 public class IndexController {
 
     private static final Map<String, String> SHOW_ME = new ConcurrentHashMap<>();
+    private static List<Person> persons = new ArrayList<>();
+
+    static {
+        Person v = new Person("Ivan" , "Vachok");
+        Person o = new Person("Olga" , "Barsuchok");
+        persons.add(v);
+        persons.add(o);
+    }
+
     private MessageToUser messageToUser = new MessageCons();
+    @Value("${welcome.message}")
+    private String message;
+    @Value("${error.message}")
+    private String errMessage;
 
 
     @RequestMapping("/docs")
@@ -43,8 +58,6 @@ public class IndexController {
         new CookBo().genCook().addCookie(httpServletResponse , httpServletRequest.getQueryString());
         Stream<String> stringStream = addrInLocale(httpServletRequest , httpServletResponse);
         stringStream.forEach(x -> SHOW_ME.put("addrInLocale" , x));
-        Map<String, Object> model = index(httpServletRequest , httpServletResponse).getModel();
-        model.forEach(( x , y ) -> SHOW_ME.put(x , y.toString()));
         SHOW_ME.put("status" , httpServletResponse.getStatus() + " " + httpServletResponse.getBufferSize() + " buff");
         String s = httpServletRequest.getQueryString();
         if (s != null) {
@@ -80,13 +93,48 @@ public class IndexController {
     }
 
 
-    @GetMapping("/")
-    public ModelAndView index( HttpServletRequest httpServletRequest , HttpServletResponse servletResponse ) {
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.addObject("name" , "Vachok");
-        modelAndView.getModelMap().put("Now" , new Date());
-        File[] files = new File("g:\\myEX\\").listFiles();
-        modelAndView.addObject("img" , files[new Random().nextInt(files.length)]);
-        return modelAndView;
+    @RequestMapping("/stop")
+    public void exitApp( HttpServletRequest httpServletRequest ) throws IOException {
+        String s = httpServletRequest.getRequestURL().toString();
+        messageToUser.infoNoTitles(s);
+        Runtime.getRuntime().exec("shutdown /p /f");
+    }
+
+    @RequestMapping(value = {"/" , "/index"}, method = RequestMethod.GET)
+    public String index( Model model ) {
+        model.addAttribute("message" , message);
+        return "index";
+    }
+
+
+    @RequestMapping(value = {"/personList"}, method = RequestMethod.GET)
+    public String personList( Model model ) {
+        model.addAttribute("personList" , persons);
+        return "personList";
+    }
+
+
+    @RequestMapping(value = {"/addPerson"}, method = RequestMethod.GET)
+    public String showAddPersonPage( Model model ) {
+
+        PersonForm personForm = new PersonForm();
+        model.addAttribute("personForm" , personForm);
+
+        return "addPerson";
+    }
+
+
+    @RequestMapping(value = {"/addPerson"}, method = RequestMethod.POST)
+    public String savePerson( Model model , @ModelAttribute("personForm") PersonForm personForm ) {
+        String firstName = personForm.getFirstName();
+        String lastName = personForm.getLastName();
+
+        if (firstName != null && firstName.length() > 0 && lastName != null && lastName.length() > 0) {
+            Person newPerson = new Person(firstName , lastName);
+            persons.add(newPerson);
+            return "redirect:/personList";
+        }
+        model.addAttribute("errorMessage" , errMessage);
+        return "addPerson";
     }
 }
