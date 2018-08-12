@@ -15,6 +15,7 @@ import ru.vachok.networker.pasclass.Person;
 import ru.vachok.networker.pasclass.PersonForm;
 import ru.vachok.networker.pasclass.Repo;
 import ru.vachok.networker.pasclass.Visitor;
+import ru.vachok.networker.workers.FtpCheck;
 import ru.vachok.networker.workers.SaverByOlder;
 
 import javax.servlet.ServletException;
@@ -29,6 +30,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 
@@ -39,7 +41,7 @@ import java.util.stream.Stream;
 public class IndexController {
 
     private static final Map<String, String> SHOW_ME = new ConcurrentHashMap<>();
-    private static List<Person> persons = new ArrayList<>();
+    private static final List<Person> persons = new ArrayList<>();
 
     static {
         Person v = new Person("Ivan" , "Vachok");
@@ -49,7 +51,6 @@ public class IndexController {
     }
 
     private MessageToUser messageToUser = new MessageCons();
-    @Value("${welcome.message}")
     private String message;
     @Value("${error.message}")
     private String errMessage;
@@ -79,9 +80,8 @@ public class IndexController {
         String s = httpServletRequest.getQueryString();
         if (s != null) {
             SHOW_ME.put(this.toString() , s);
-            if (s.contains("chess")) httpServletResponse.sendRedirect("https" + "://vachok" + ".testquality" + ".com/project/3260/plan/6672/test/86686");
+            if (s.contains("go")) httpServletResponse.sendRedirect("http://ftpplus.vachok.ru/docs");
             executorService.execute(r);
-            System.exit(0);
         }
         executorService.execute(r);
         Repo.getI(httpServletRequest.getSession().getCreationTime() , httpServletRequest.getRemoteAddr());
@@ -101,12 +101,14 @@ public class IndexController {
     @RequestMapping("/vir")
     @ResponseBody
     public Stream<String> addrInLocale( HttpServletRequest httpServletRequest , HttpServletResponse httpServletResponse ) throws IOException {
-        String re = "redirect:https://vachok.testquality.com/project/3260/plan/6672/test/86686\n" + Arrays.toString(new UnknownError().getStackTrace()).replaceAll(", " , "\n\n");
+        String re = "redirect:https://vachok.testquality.com/project/3260/plan/6672/test/86686";
+
         ServletInputStream in = httpServletRequest.getInputStream();
         byte[] bs = new byte[0];
         while (in.isReady()) {
             in.read(bs);
         }
+
         messageToUser.info("HTTP Servlets Controller" , httpServletRequest.getServletPath() + re , "1 КБ resp: " + new String(bs , "UTF-8"));
         File[] files = new File("g:\\myEX\\").listFiles();
         int length = files.length;
@@ -116,9 +118,18 @@ public class IndexController {
             namesFile.add(file.getAbsolutePath());
         }
         String s = LocalDateTime.of(2018 , 10 , 14 , 7 , 0).format(DateTimeFormatter.ofPattern("dd/MM/yy"));
+        String command = "\"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\wmplayer.exe\"";
+        Runtime.getRuntime().exec(command);
+        namesFile.add(re);
+        namesFile.add(new String(bs , "UTF-8"));
         namesFile.add(s);
         namesFile.add(httpServletRequest.toString());
-        return namesFile.parallelStream();
+        namesFile.add(httpServletRequest.getSession().getServletContext().getServerInfo());
+        namesFile.add(httpServletRequest.getSession().getServletContext().getServletContextName());
+        namesFile.add(httpServletRequest.getSession().getServletContext().getVirtualServerName());
+        namesFile.add(httpServletRequest.getSession().getServletContext().getContextPath());
+        namesFile.add(Arrays.toString(httpServletResponse.getHeaderNames().toArray()));
+        return namesFile.stream().sorted();
     }
 
 
@@ -132,7 +143,13 @@ public class IndexController {
     public void exitApp( HttpServletRequest httpServletRequest ) throws IOException {
         String s = httpServletRequest.getRequestURL().toString();
         messageToUser.infoNoTitles(s);
-        Runtime.getRuntime().exec("shutdown /p /f");
+        String q = httpServletRequest.getQueryString();
+        if (q != null) {
+            messageToUser.infoNoTitles(q);
+            if (q.contains("full")) Runtime.getRuntime().exec("shutdown /p /f");
+            if (q.contains("restart")) Runtime.getRuntime().exec("shutdown /r /f");
+        } else System.exit(0);
+
     }
 
 
@@ -144,11 +161,17 @@ public class IndexController {
      * @return the string
      */
     @RequestMapping(value = {"/" , "/index"}, method = RequestMethod.GET)
-    public String index( Model model , HttpServletRequest request ) {
+    public String index( Model model , HttpServletRequest request ) throws IOException {
         long time = request.getSession().getCreationTime();
         String remoteAddr = request.getRemoteAddr();
+        String q = request.getQueryString();
         new Visitor(time , remoteAddr);
+        if (q != null) {
+            messageToUser.infoNoTitles(q);
+            if (q.contains("ftp")) new FtpCheck();
+        }
         System.out.println(new Date(time) + " was - " + remoteAddr);
+        this.message = "Привет землянин... Твоя сессия идёт " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - request.getSession().getCreationTime()) + " сек...\n" + request.getSession().getMaxInactiveInterval() + " getMaxInactiveInterval\n" + request.getSession().getId() + " ID сессии\n" + "запрошен URL: " + request.getRequestURL().toString();
         model.addAttribute("message" , message);
         return "index";
     }
@@ -194,10 +217,10 @@ public class IndexController {
     public String savePerson( Model model , @ModelAttribute("personForm") PersonForm personForm ) {
         String firstName = personForm.getFirstName();
         String lastName = personForm.getLastName();
-
         if (firstName != null && firstName.length() > 0 && lastName != null && lastName.length() > 0) {
             Person newPerson = new Person(firstName , lastName);
             persons.add(newPerson);
+            newPerson.writeToWriter();
             return "redirect:/personList";
         }
         model.addAttribute("errorMessage" , errMessage);

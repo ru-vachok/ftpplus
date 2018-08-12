@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 
 
 /**
@@ -32,6 +33,13 @@ public class ErrControl implements ErrorController {
     public String errHandle( HttpServletRequest httpServletRequest) {
         Integer statCode = ( Integer ) httpServletRequest.getAttribute("javax.servlet.error.status_code");
         Exception exception = ( Exception ) httpServletRequest.getAttribute("javax.servlet.error.exception");
-        return String.format("<html><body><h2>ОШИБКА, нех здесь ловить...</h2><div>Status code: <b>%s</b></div>" + "<div>Exception Message: <b>%s</b></div><body></html>", statCode, exception==null? "N/A": exception.getMessage());
+        return String.format("<html><body><h2>ОШИБКА, нех здесь ловить...</h2><div>Status code: <b>%s</b></div>" + "<div>Exception Message: <b>%s</b></div><body></html>" , statCode , exception == null ? "N/A" : exception.getMessage());
+    }
+
+
+    @RequestMapping("/inerror")
+    @ResponseBody
+    public String internError( Exception e ) {
+        return e.getMessage() + "         \n" + Arrays.toString(e.getStackTrace());
     }
 }

@@ -5,6 +5,9 @@ package ru.vachok.networker.pasclass;
 import ru.vachok.messenger.MessageCons;
 import ru.vachok.messenger.MessageToUser;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 
 /**
  * The type Person.
@@ -25,10 +28,12 @@ public class Person {
     private String lastName;
 
 
+
     /**
      * Instantiates a new Person.
      */
     public Person() {
+        writeToWriter();
     }
 
 
@@ -81,5 +86,17 @@ public class Person {
      */
     public void setLastName( String lastName ) {
         this.lastName = lastName;
+    }
+
+
+    public void writeToWriter() {
+        try (FileWriter fileWriter = new FileWriter(System.currentTimeMillis() + "_personID.txt")) {
+            for (char c : lastName.toCharArray()) {
+                fileWriter.append(c);
+            }
+            fileWriter.append("\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
