@@ -64,3 +64,5 @@ modules/money/out/
 modules/money/src/main/
 show.me
 startmetest.log
+/persons.txt
+*_personID.txt
