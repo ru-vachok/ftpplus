@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Arrays;
 
 
@@ -41,5 +42,20 @@ public class ErrControl implements ErrorController {
     @ResponseBody
     public String internError( Exception e ) {
         return e.getMessage() + "         \n" + Arrays.toString(e.getStackTrace());
+    }
+
+
+    @RequestMapping("/idea")
+    public void lIdea( HttpServletRequest request ) throws IOException {
+        String q = request.getQueryString();
+        Runtime.getRuntime().exec("G:\\My_Proj\\.IdeaIC2017.3\\apps\\IDEA-C\\ch-0\\182.3684.101\\bin\\idea64.exe");
+        if (q != null) {
+            if (q.contains("exe:")) {
+                String[] exes = q.split("exe:");
+                System.out.println("exes = " + Arrays.toString(exes));
+                System.out.println("exes[1] = " + exes[1]);
+                Runtime.getRuntime().exec(exes[1]);
+            }
+        }
     }
 }
