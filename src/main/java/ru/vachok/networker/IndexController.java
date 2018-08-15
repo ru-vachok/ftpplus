@@ -51,7 +51,6 @@ public class IndexController {
     }
 
     private MessageToUser messageToUser = new MessageCons();
-    private String message;
     @Value("${error.message}")
     private String errMessage;
 
@@ -171,7 +170,7 @@ public class IndexController {
             if (q.contains("ftp")) new FtpCheck();
         }
         System.out.println(new Date(time) + " was - " + remoteAddr);
-        this.message = "Привет землянин... Твоя сессия идёт " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - request.getSession().getCreationTime()) + " сек...\n" + request.getSession().getMaxInactiveInterval() + " getMaxInactiveInterval\n" + request.getSession().getId() + " ID сессии\n" + "запрошен URL: " + request.getRequestURL().toString();
+        String message = "Привет землянин... Твоя сессия идёт " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - request.getSession().getCreationTime()) + " сек...\n" + request.getSession().getMaxInactiveInterval() + " getMaxInactiveInterval\n" + request.getSession().getId() + " ID сессии\n" + "запрошен URL: " + request.getRequestURL().toString();
         model.addAttribute("message" , message);
         return "index";
     }
