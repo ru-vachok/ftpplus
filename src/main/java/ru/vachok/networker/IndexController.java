@@ -20,10 +20,13 @@ import ru.vachok.networker.workers.SaverByOlder;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -42,6 +45,7 @@ public class IndexController {
 
     private static final Map<String, String> SHOW_ME = new ConcurrentHashMap<>();
     private static final List<Person> persons = new ArrayList<>();
+    private static final int EXPIRY = 90;
 
     static {
         Person v = new Person("Ivan" , "Vachok");
@@ -148,7 +152,6 @@ public class IndexController {
             if (q.contains("full")) Runtime.getRuntime().exec("shutdown /p /f");
             if (q.contains("restart")) Runtime.getRuntime().exec("shutdown /r /f");
         } else System.exit(0);
-
     }
 
 
@@ -171,7 +174,30 @@ public class IndexController {
         }
         System.out.println(new Date(time) + " was - " + remoteAddr);
         String message = "Привет землянин... Твоя сессия идёт " + TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - request.getSession().getCreationTime()) + " сек...\n" + request.getSession().getMaxInactiveInterval() + " getMaxInactiveInterval\n" + request.getSession().getId() + " ID сессии\n" + "запрошен URL: " + request.getRequestURL().toString();
+        Cookie[] requestCookies = request.getCookies();
+        File dirCOOK = new File("cook");
+        boolean mkdir = dirCOOK.mkdir();
+        Enumeration<String> attributeNames = request.getSession().getAttributeNames();
+        StringBuilder sb = new StringBuilder();
+        while (attributeNames.hasMoreElements()) sb.append(attributeNames.nextElement());
+        for (Cookie cookie : requestCookies) {
+            cookie.setDomain(InetAddress.getLocalHost().getHostName());
+            cookie.setMaxAge(EXPIRY);
+            cookie.setPath(dirCOOK.getAbsolutePath());
+            Runtime runtime = Runtime.getRuntime();
+            cookie.setValue(remoteAddr + runtime.availableProcessors() + " processors\n" + runtime.freeMemory() + "/" + runtime.totalMemory() + " memory\n" + model.asMap().toString().replaceAll(", " , "\n"));
+            cookie.setComment(remoteAddr + " ip\n" + sb.toString());
+            if (mkdir) {
+                System.out.println(dirCOOK.getAbsolutePath());
+            }
+            try (FileOutputStream outputStream = new FileOutputStream(dirCOOK.getAbsolutePath() + "\\cook" + System.currentTimeMillis() + ".txt")) {
+                String s = "Domain: " + cookie.getDomain() + " name: " + cookie.getName() + " comment: " + cookie.getComment() + "\n" + cookie.getPath() + "\n" + cookie.getValue() + "\n" + new Date(System.currentTimeMillis());
+                byte[] bytes = s.getBytes();
+                outputStream.write(bytes , 0 , bytes.length);
+            }
+        }
         model.addAttribute("message" , message);
+        System.out.println("dirCOOK = " + dirCOOK.getAbsolutePath());
         return "index";
     }
 

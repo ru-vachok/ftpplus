@@ -1,13 +1,37 @@
-runtime: java
-env: flex
-
-# This sample incurs costs to run on the App Engine flexible environment.
-# The settings below are to reduce costs during testing and are not appropriate
-# for production use. For more information, see:
-# https://cloud.google.com/appengine/docs/flexible/python/configuring-your-app-with-app-yaml
-manual_scaling:
-  instances: 1
-resources:
-  cpu: 1
-  memory_gb: 0.3
-  disk_size_gb: 10
+---
+apiVersion: "extensions/v1beta1"
+kind: "Deployment"
+metadata:
+  name: "informer"
+  namespace: "default"
+  labels:
+    app: "informer"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: "informer"
+  template:
+    metadata:
+      labels:
+        app: "informer"
+    spec:
+      containers:
+      - name: "nginx"
+        image: "eu.gcr.io/the-informer-213019/appengine"
+---
+apiVersion: "autoscaling/v1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  name: "informer-hpa"
+  namespace: "default"
+  labels:
+    app: "informer"
+spec:
+  scaleTargetRef:
+    kind: "Deployment"
+    name: "informer"
+    apiVersion: "apps/v1beta1"
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
